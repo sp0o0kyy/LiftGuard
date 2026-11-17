@@ -1,0 +1,41 @@
+services:
+  # MariaDB хранит пользователей, тренировки, связи и комментарии.
+  db:
+    image: mariadb:11.4
+    container_name: liftguard-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - liftguard_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Node.js-приложение собирает клиент, запускает Express и обращается к db.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: liftguard-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+    # Наружу порт не публикуется: внешний доступ будет идти через Nginx на VPS.
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  # Именованный volume сохраняет базу при пересоздании контейнеров.
+  liftguard_db_data:
