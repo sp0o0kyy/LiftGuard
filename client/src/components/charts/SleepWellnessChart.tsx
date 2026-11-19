@@ -22,6 +22,7 @@ export interface WellnessSleepPoint {
   wellness: number;
   sleepHours: number;
   totalVolume: number;
+  bodyWeight?: number | null;
   riskLevel?: string;
   title?: string;
 }
@@ -73,60 +74,25 @@ export function SleepWellnessChart({
               <ComposedChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-muted/40" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis
-                  yAxisId="sleep"
-                  domain={[0, 12]}
-                  tick={{ fontSize: 11 }}
-                  unit=" ч"
-                  orientation="left"
-                />
-                <YAxis
-                  yAxisId="wellness"
-                  domain={[0, 10]}
-                  tick={{ fontSize: 11 }}
-                  orientation="right"
-                  unit="/10"
-                />
+                <YAxis yAxisId="sleep" domain={[0, 12]} tick={{ fontSize: 11 }} unit=" ч" orientation="left" />
+                <YAxis yAxisId="wellness" domain={[0, 10]} tick={{ fontSize: 11 }} orientation="right" unit="/10" />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     const d = payload[0].payload as WellnessSleepPoint;
                     return (
                       <div className="rounded-lg border bg-popover p-2.5 text-xs shadow-md space-y-1">
-                        <p className="font-semibold text-foreground">
-                          {d.date} — {d.title}
-                        </p>
-                        <p className="text-indigo-600 dark:text-indigo-400 font-medium">
-                          Сон: {d.sleepHours} ч
-                        </p>
-                        <p className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          Самочувствие: {d.wellness}/10
-                        </p>
-                        <p className="text-muted-foreground">
-                          Объём: {Math.round(d.totalVolume).toLocaleString("ru-RU")} кг
-                        </p>
+                        <p className="font-semibold text-foreground">{d.date} — {d.title}</p>
+                        <p className="text-indigo-600 dark:text-indigo-400 font-medium">Сон: {d.sleepHours} ч</p>
+                        <p className="text-emerald-600 dark:text-emerald-400 font-medium">Самочувствие: {d.wellness}/10</p>
+                        <p className="text-muted-foreground">Объём: {Math.round(d.totalVolume).toLocaleString("ru-RU")} кг</p>
                       </div>
                     );
                   }}
                 />
                 <Legend />
-                <Bar
-                  yAxisId="sleep"
-                  dataKey="sleepHours"
-                  name="Сон, ч"
-                  fill="#6366f1"
-                  radius={[4, 4, 0, 0]}
-                  opacity={0.8}
-                />
-                <Line
-                  yAxisId="wellness"
-                  type="monotone"
-                  dataKey="wellness"
-                  name="Самочувствие"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: "white", strokeWidth: 2 }}
-                />
+                <Bar yAxisId="sleep" dataKey="sleepHours" name="Сон, ч" fill="#6366f1" radius={[4, 4, 0, 0]} opacity={0.8} />
+                <Line yAxisId="wellness" type="monotone" dataKey="wellness" name="Самочувствие" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: "white", strokeWidth: 2 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
