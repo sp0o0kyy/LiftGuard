@@ -38,7 +38,7 @@ interface AuthContextValue {
   isCoach: boolean;
   isTrainee: boolean;
   isAdmin: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<AppUser>;
   register: (data: {
     name: string;
     username: string;
@@ -82,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (identifier: string, password: string) => {
-      await loginMutation.mutateAsync({ identifier, password });
+      const data = await loginMutation.mutateAsync({ identifier, password });
+      return data.user as AppUser;
     },
     [loginMutation]
   );

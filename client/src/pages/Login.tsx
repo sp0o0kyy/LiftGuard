@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const testAccounts = [
@@ -30,18 +30,11 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      await login(identifier, password);
+      const user = await login(identifier, password);
       toast.success("Вход выполнен");
-      // Получить обновлённые данные пользователя после короткой паузы или передать это контексту
-      setTimeout(() => {
-        try {
-          const raw = localStorage.getItem("liftguard-user-info");
-          const u = raw ? JSON.parse(raw) : null;
-          navigate(u?.role === "coach" ? "/coach/dashboard" : "/trainee/dashboard");
-        } catch {
-          navigate("/coach/dashboard");
-        }
-      }, 50);
+      // Роль берём из ответа сервера, а не из localStorage: это исключает
+      // переход на устаревший маршрут и появление страницы 404.
+      navigate(user.role === "coach" ? "/coach/dashboard" : "/trainee/workout/new");
     } catch (err: any) {
       setError(err?.message || "Неверный логин или пароль");
     } finally {
@@ -53,9 +46,7 @@ export default function Login() {
     <div className="max-w-md mx-auto py-8 sm:py-12 space-y-6">
       <div className="text-center space-y-2">
         <Link href="/" className="inline-flex items-center gap-2 group">
-          <div className="rounded-xl bg-primary p-2.5 text-primary-foreground shadow-sm">
-            <Dumbbell className="h-6 w-6" />
-          </div>
+          <img src="/liftguard-logo.png" alt="Логотип LiftGuard" className="h-12 w-12 rounded-xl object-contain" />
           <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
             LiftGuard
           </span>

@@ -1,6 +1,7 @@
 // Серверный модуль LiftGuard: API, проверки доступа, хранение данных или расчёты.
 // Ниже находится реализация этого модуля; названия функций и типов показывают его связи с остальной системой.
 
+import "dotenv/config";
 import { getDb } from "./db";
 import { hashPassword } from "./auth";
 import {
@@ -408,4 +409,19 @@ export async function runSeed(): Promise<{ seeded: boolean; coach: any; trainee:
   await insertWorkouts(maria, mariaWorkouts);
 
   return { seeded: true, coach, trainee: ivan, trainee2: maria };
+}
+
+// Позволяет запускать заполнение базы обычной командой `pnpm seed`.
+// Явное завершение процесса нужно для Windows, где пул MariaDB может
+// оставаться открытым после выполнения всех запросов.
+if (process.argv[1]?.toLowerCase().endsWith("seed.ts")) {
+  runSeed()
+    .then((result) => {
+      console.log(`Тестовые данные созданы: ${result.seeded}`);
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("Ошибка заполнения базы:", error);
+      process.exit(1);
+    });
 }
